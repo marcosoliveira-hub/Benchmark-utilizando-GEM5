@@ -76,54 +76,6 @@ int get_capacidade(Rede *rede, int u, int v)
     return rede->arestas[u][v];
 }
 
-int *bfs(Rede *rede, int vertice_inicial)
-{
-    int *visitado = (int *)malloc(rede->num_vertices * sizeof(int));
-
-    if (visitado == NULL)
-    {
-        printf("Erro ao alocar memória para o vetor visitado.\n");
-        exit(1);
-    }
-
-    int *pai = (int *)malloc(rede->num_vertices * sizeof(int));
-
-    if (pai == NULL)
-    {
-        printf("Erro ao alocar memória para o vetor pai.\n");
-        exit(1);
-    }
-
-    int fila[rede->num_vertices];
-    int inicio = 0;
-    int fim = 0;
-    for (int i = 0; i < rede->num_vertices; i++)
-    {
-        visitado[i] = 0;
-        pai[i] = -1;
-    }
-    fila[fim++] = vertice_inicial;
-    visitado[vertice_inicial] = 1;
-    pai[vertice_inicial] = -1;
-    while (inicio != fim)
-    {
-        int u = fila[inicio++];
-        for (int v = 0; v < rede->num_vertices; v++)
-        {
-            if (visitado[v] == 0 && get_capacidade(rede, u, v) > 0)
-            {
-                fila[fim++] = v;
-                visitado[v] = 1;
-                pai[v] = u;
-            }
-        }
-    }
-
-    free(visitado);
-
-    return pai;
-}
-
 Rede *criar_rede_residual(Rede *rede, int *fluxo)
 {
     Rede *rede_residual = criar_rede(rede->num_vertices, rede->fonte, rede->sumidouro);
@@ -146,59 +98,6 @@ Rede *criar_rede_residual(Rede *rede, int *fluxo)
         }
     }
     return rede_residual;
-}
-
-int edmonds_karp(Rede *rede)
-{
-    rede->fluxo_maximo = 0;
-    int *fluxo = (int *)malloc(rede->num_vertices * rede->num_vertices * sizeof(int));
-
-    if (fluxo == NULL)
-    {
-        printf("Erro ao alocar memória para o vetor fluxo.\n");
-        exit(1);
-    }
-
-    for (int i = 0; i < rede->num_vertices * rede->num_vertices; i++)
-    {
-        fluxo[i] = 0;
-    }
-    Rede *rede_residual = criar_rede_residual(rede, fluxo);
-    int *pai = bfs(rede_residual, rede->fonte);
-    while (pai[rede->sumidouro] != -1)
-    {
-        int fluxo_caminho = INT_MAX;
-        int v = rede->sumidouro;
-        while (v != rede->fonte)
-        {
-            int u = pai[v];
-            fluxo_caminho = fluxo_caminho < get_capacidade(rede_residual, u, v) ? fluxo_caminho : get_capacidade(rede_residual, u, v);
-            v = u;
-        }
-        v = rede->sumidouro;
-        while (v != rede->fonte)
-        {
-            int u = pai[v];
-            if (rede->adj[u][v] == 1)
-            {
-                fluxo[u * rede->num_vertices + v] += fluxo_caminho;
-            }
-            else if (rede->adj[v][u] == 1)
-            {
-                fluxo[v * rede->num_vertices + u] -= fluxo_caminho;
-            }
-            v = u;
-        }
-        rede->fluxo_maximo += fluxo_caminho;
-        rede_residual = criar_rede_residual(rede, fluxo);
-        pai = bfs(rede_residual, rede->fonte);
-    }
-
-    destruir_rede(rede_residual);
-    free(fluxo);
-    free(pai);
-
-    return rede->fluxo_maximo;
 }
 
 Rede *criar_rede_aleatoria(int num_vertices)
@@ -249,7 +148,7 @@ void escrever_grafo(Rede *rede, char *nome_arquivo)
     {
         for (int j = 0; j < rede->num_vertices; j++)
         {
-            if (rede->adj[i][j] == 1)
+            if (rede->adj[i][j] == 1 && rede->arestas[i][j] != 0)
             {
                 fprintf(arquivo, "%d %d %d\n", i, j, rede->arestas[i][j]);
             }

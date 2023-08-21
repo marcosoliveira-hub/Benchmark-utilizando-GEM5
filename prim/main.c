@@ -44,34 +44,30 @@ typedef struct subset
 } subset;
 
 // Função para encontrar o conjunto de um elemento i
-
 int find(subset subsets[], int i)
 {
-    // Encontrar o conjunto e fazer o elemento i apontar para o conjunto
     if (subsets[i].parent != i)
         subsets[i].parent = find(subsets, subsets[i].parent);
-
     return subsets[i].parent;
 }
 
 // Função que faz a união de dois conjuntos de x e y
-
 void Union(subset subsets[], int x, int y)
 {
-    int xroot = find(subsets, x); // Encontrar o conjunto de x
-    int yroot = find(subsets, y); // Encontrar o conjunto de y
+    int xroot = find(subsets, x);
+    int yroot = find(subsets, y);
 
-    // Anexar a árvore de menor rank sob a raiz da árvore de maior rank
-    if (subsets[xroot].rank < subsets[yroot].rank)
-        subsets[xroot].parent = yroot;
-    else if (subsets[xroot].rank > subsets[yroot].rank)
-        subsets[yroot].parent = xroot;
-
-    // Se os ranks forem iguais, então faça um deles como raiz e incremente seu rank por 1
-    else
+    if (xroot != yroot)
     {
-        subsets[yroot].parent = xroot;
-        subsets[xroot].rank++;
+        if (subsets[xroot].rank < subsets[yroot].rank)
+            subsets[xroot].parent = yroot;
+        else if (subsets[xroot].rank > subsets[yroot].rank)
+            subsets[yroot].parent = xroot;
+        else
+        {
+            subsets[yroot].parent = xroot;
+            subsets[xroot].rank++;
+        }
     }
 }
 
@@ -81,25 +77,25 @@ int compare(const void *a, const void *b)
 {
     Edge *a1 = (Edge *)a;
     Edge *b1 = (Edge *)b;
-    return a1->weight > b1->weight;
+    return a1->weight - b1->weight;
 }
 
-// Função principal do algoritmo de Prim
+// Função principal do algoritmo de Prim; Leve em conta que a escrita deve conter o valor do peso sem altera-lo
 
 void primMST(Graph *graph, FILE *saida)
 {
-    int V = graph->V; // Número de vértices no grafo
-    Edge result[V];   // Guarda o resultado da MST
-    int e = 0;        // Variável auxiliar para o resultado
-    int i = 0;        // Variável auxiliar para o grafo
+    int V = graph->V;
+    Edge result[V]; // Array para armazenar a MST
+    int e = 0;      // Index usado para o resultado
+    int i = 0;      // Index usado para as arestas ordenadas
 
-    // Ordenar todas as arestas em ordem não decrescente de acordo com seus pesos
+    // Ordena todas as arestas em ordem crescente de acordo com seus pesos
     qsort(graph->edge, graph->E, sizeof(graph->edge[0]), compare);
 
-    // Alocar memória para criar V subconjuntos
+    // Aloca memória para criar V subconjuntos
     subset *subsets = (subset *)malloc(V * sizeof(subset));
 
-    // Criar V subconjuntos com elementos individuais
+    // Cria V subconjuntos com elementos individuais
     for (int v = 0; v < V; ++v)
     {
         subsets[v].parent = v;
@@ -107,29 +103,27 @@ void primMST(Graph *graph, FILE *saida)
     }
 
     // Número de arestas a serem tomadas é igual a V-1
-    while (e < V - 1)
+    while (e < V - 1 && i < graph->E)
     {
-        // Pegar a menor aresta e incrementar o index para a próxima iteração
+        // Pega a próxima aresta de acordo com a ordenação
         Edge next_edge = graph->edge[i++];
 
         int x = find(subsets, next_edge.src);
         int y = find(subsets, next_edge.dest);
 
-        // Se incluir essa aresta não causa ciclo, inclua-a no resultado e incremente o index de resultado para o próximo vértice
+        // Se incluir essa aresta não forma um ciclo, inclua-a na MST e incremente o index do resultado para a próxima aresta
         if (x != y)
         {
             result[e++] = next_edge;
             Union(subsets, x, y);
         }
-        // Senão, descarte a aresta
     }
 
-    // Escrever o conteúdo do resultado para um arquivo de saída
+    // Escreve a MST no arquivo de saída
     for (i = 0; i < e; ++i)
     {
-        fprintf(saida, "%d %d %d\n", result[i].src, result[i].dest, result[i].weight);
+        fprintf(saida, "%d %d\n", result[i].src, result[i].dest);
     }
-
     return;
 }
 
@@ -154,16 +148,10 @@ int main(int argc, char *argv[])
     }
 
     Graph *graph = createGraph(V, E);
-    /*     for (int i = 0; i < E; i++)
-        {
-            fscanf(entrada, "%d %d %d", &graph->edge[i].src, &graph->edge[i].dest, &graph->edge[i].weight);
-        } */
-
-    // rewrite the above for loop using pointer arithmetic
 
     for (int i = 0; i < E; i++)
     {
-        fscanf(entrada, "%d %d %d", &((graph->edge + i)->src), &((graph->edge + i)->dest), &((graph->edge + i)->weight));
+        fscanf(entrada, "%d %d %d", &(graph->edge[i].src), &(graph->edge[i].dest), &(graph->edge[i].weight));
     }
 
     FILE *saida = fopen(argv[2], "w");

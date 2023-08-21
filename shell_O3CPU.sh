@@ -3,7 +3,7 @@
 gem5_executable=~/gem5/build/X86/gem5.opt
 se=~/gem5/configs/deprecated/example/se.py
 
-output_folder=~/arq2prova1/output
+output_folder=~/arq2prova1/output/
 
 mkdir -p output_folder
 
@@ -13,11 +13,10 @@ INPUT_FILE_EDMONDS=("~/arq2prova1/edmondskarp/geradorDeTestes/100vertices.txt" \
         "~/arq2prova1/edmondskarp/geradorDeTestes/1000vertices.txt")
 
 for entrada in ${INPUT_FILE_EDMONDS[@]}; do \
-    $gem5_executable -d "$output_folder" $se --caches --l1i_size=16kB --l1d_size=64kB \
-    --cpu-type=O3CPU --bp-type=BiModeBP --cmd=$edmonds_executable --options="${entrada}" \
-    
-
-    $gem5_executable -d "$output_folder" $se --caches --l1i_size=16kB --l1d_size=64kB \
-    --cpu-type=O3CPU --bp-type=LocalBP --cmd=$edmonds_executable --options="${entrada}" \
+    $gem5_executable $se --caches --l1i_size=16kB --l1d_size=64kB \
+    --cpu-type=O3CPU --bp-type=BiModeBP --cmd=$edmonds_executable -o $entrada \
+	
+    $gem5_executable $se --caches --l1i_size=16kB --l1d_size=64kB \
+    --cpu-type=O3CPU --bp-type=LocalBP --cmd=$edmonds_executable -o $entrada
 
 done

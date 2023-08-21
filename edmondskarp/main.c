@@ -15,6 +15,7 @@
 
 #define MAX_VERTICES 10000
 
+// Estrutura de dados para representar uma rede de fluxo
 typedef struct
 {
     int num_vertices;
@@ -25,6 +26,8 @@ typedef struct
     int fonte;
     int sumidouro;
 } Rede;
+
+// Função para criar uma estrutura Rede
 
 Rede *criar_rede(int num_vertices, int fonte, int sumidouro)
 {
@@ -51,11 +54,13 @@ Rede *criar_rede(int num_vertices, int fonte, int sumidouro)
     return rede;
 }
 
+// Função para destruir uma estrutura Rede
 void destruir_rede(Rede *rede)
 {
     free(rede);
 }
 
+// Função para adicionar uma aresta em uma estrutura Rede
 void adicionar_aresta(Rede *rede, int u, int v, int capacidade)
 {
     rede->adj[u][v] = 1;
@@ -64,6 +69,7 @@ void adicionar_aresta(Rede *rede, int u, int v, int capacidade)
     rede->num_arestas++;
 }
 
+//  Função para remover uma aresta em uma estrutura Rede
 void remover_aresta(Rede *rede, int u, int v)
 {
     rede->adj[u][v] = 0;
@@ -71,11 +77,13 @@ void remover_aresta(Rede *rede, int u, int v)
     rede->num_arestas--;
 }
 
+// Função para obter a capacidade de uma aresta em uma estrutura Rede
 int get_capacidade(Rede *rede, int u, int v)
 {
     return rede->arestas[u][v];
 }
 
+// Função para mostrar as arestas de uma estrutura Rede
 void mostrar_arestas(Rede *rede)
 {
     for (int i = 0; i < rede->num_vertices; i++)
@@ -90,6 +98,7 @@ void mostrar_arestas(Rede *rede)
     }
 }
 
+// Função para executar uma busca em largura em uma estrutura Rede
 int *bfs(Rede *rede, int vertice_inicial)
 {
     int *visitado = (int *)malloc(rede->num_vertices * sizeof(int));
@@ -138,6 +147,7 @@ int *bfs(Rede *rede, int vertice_inicial)
     return pai;
 }
 
+// Função para criar uma rede residual a partir de uma rede e um vetor de fluxo
 Rede *criar_rede_residual(Rede *rede, int *fluxo)
 {
     Rede *rede_residual = criar_rede(rede->num_vertices, rede->fonte, rede->sumidouro);
@@ -155,6 +165,25 @@ Rede *criar_rede_residual(Rede *rede, int *fluxo)
     return rede_residual;
 }
 
+// Função para escrever uma rede em um arquivo
+void escrever_grafo(Rede *rede, char *nome_arquivo)
+{
+    FILE *arquivo = fopen(nome_arquivo, "w");
+    fprintf(arquivo, "%d %d\n", rede->num_vertices, rede->num_arestas);
+    for (int i = 0; i < rede->num_vertices; i++)
+    {
+        for (int j = 0; j < rede->num_vertices; j++)
+        {
+            if (rede->adj[i][j] == 1)
+            {
+                fprintf(arquivo, "%d %d %d\n", i, j, rede->arestas[i][j]);
+            }
+        }
+    }
+    fclose(arquivo);
+}
+
+// Função para executar o algoritmo de Edmonds Karp em uma estrutura Rede
 int edmonds_karp(Rede *rede)
 {
     rede->fluxo_maximo = 0;
@@ -201,6 +230,20 @@ int edmonds_karp(Rede *rede)
         pai = bfs(rede_residual, rede->fonte);
     }
 
+    for (int i = 0; i < rede->num_vertices; i++)
+    {
+        for (int j = 0; j < rede->num_vertices; j++)
+        {
+            if (rede->adj[i][j] == 1)
+            {
+                if (rede->arestas[i][j] == 0)
+                {
+                    remover_aresta(rede, i, j);
+                }
+            }
+        }
+    }
+
     destruir_rede(rede_residual);
     free(fluxo);
     free(pai);
@@ -208,7 +251,7 @@ int edmonds_karp(Rede *rede)
     return rede->fluxo_maximo;
 }
 
-// Create to read a graph from a file
+// Função para criar uma rede a partir de um arquivo
 
 Rede *criar_rede_arquivo(char *nome_arquivo)
 {
@@ -231,17 +274,19 @@ Rede *criar_rede_arquivo(char *nome_arquivo)
     return rede;
 }
 
+// Função principal
 int main(int argc, char *argv[])
 {
     srand(time(NULL));
-    if (argc != 2)
+    if (argc != 3)
     {
-        printf("exec: main <arq entrada>\n");
+        printf("exec: main <arq entrada> <arq saida>\n");
         exit(1);
     }
 
     Rede *rede = criar_rede_arquivo(argv[1]);
     printf("Fluxo maximo: %d\n", edmonds_karp(rede));
+    escrever_grafo(rede, argv[2]);
     destruir_rede(rede);
     return 0;
 }
