@@ -1,0 +1,1 @@
+build/X86/gem5.opt configs/deprecated/example/se.py --cmd=../arq2prova1/prim/exec -o "../arq2prova1/prim/geradorDeTestes/100teste.txt saida100.txt" --l1d_size=64kB  --l1i_size=16kB  --caches --cpu-type=O3CPU
