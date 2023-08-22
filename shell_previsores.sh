@@ -9,7 +9,7 @@ SAIDAS=(saida_100.txt saida_1000.txt)
 QTDE_ENTRADAS=(100 1000)
 PREVISORES=(LocalBP BiModeBP)
 
-output="./saida"
+output="./saida_previsores"
 saida_algoritmos="${output}/saida_algoritmos"
 
 mkdir -p $output
@@ -49,7 +49,7 @@ for programa in ${NOME_PROG[1]}; do
             --cpu-type=O3CPU --caches --l1d_size=64kB --l1i_size=16kB\
             --bp-type=${previsor}
 
-            mv ${output}/stats.txt ${output}/${programa}_${previsor}_${QTDE_ENTRADAS}.txt
+            mv ${output}/stats.txt ${output}/${programa}_${previsor}_${QTDE_ENTRADAS[idx]}.txt
 
             echo "Finalizado $programa com $previsor e $entrada"
 

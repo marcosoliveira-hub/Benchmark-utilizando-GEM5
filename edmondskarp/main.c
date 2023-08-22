@@ -166,9 +166,10 @@ Rede *criar_rede_residual(Rede *rede, int *fluxo)
 }
 
 // Função para escrever uma rede em um arquivo
-void escrever_grafo(Rede *rede, char *nome_arquivo)
+void escrever_fluxo_maximo_e_grafo(Rede *rede, int fluxo_maximo, char *nome_arquivo)
 {
     FILE *arquivo = fopen(nome_arquivo, "w");
+    fprintf(arquivo, "Fluxo maximo = %d\n", fluxo_maximo);
     fprintf(arquivo, "%d %d\n", rede->num_vertices, rede->num_arestas);
     for (int i = 0; i < rede->num_vertices; i++)
     {
@@ -285,8 +286,9 @@ int main(int argc, char *argv[])
     }
 
     Rede *rede = criar_rede_arquivo(argv[1]);
-    printf("Fluxo maximo: %d\n", edmonds_karp(rede));
-    escrever_grafo(rede, argv[2]);
+    int fluxo_maximo = edmonds_karp(rede);
+    printf("Fluxo maximo: %d\n", fluxo_maximo);
+    escrever_fluxo_maximo_e_grafo(rede, fluxo_maximo, argv[2]);
     destruir_rede(rede);
     return 0;
 }
