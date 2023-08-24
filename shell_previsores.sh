@@ -4,9 +4,9 @@ GEM5_DIR=~/gem5
 GEM5_BUILD_DIR=$GEM5_DIR/build/X86/gem5.opt
 GEM5_SE_DIR=$GEM5_DIR/configs/deprecated/example/se.py
 NOME_PROG=("edmondskarp_exe" "prim_exe")
-ENTRADAS=(100teste.txt 1000teste.txt)
-SAIDAS=(saida_100.txt saida_1000.txt)
-QTDE_ENTRADAS=(100 1000)
+ENTRADAS=(200teste.txt 400teste.txt)
+SAIDAS=(saida_200.txt saida_400.txt)
+QTDE_ENTRADAS=(200 400)
 PREVISORES=(LocalBP BiModeBP)
 
 output="./saida_previsores"
