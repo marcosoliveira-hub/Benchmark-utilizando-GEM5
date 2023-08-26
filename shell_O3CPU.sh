@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Altere o TOP_DIR para a localização do diretório contendo as pastas /edmondskarp e /prim
-TOP_DIR=~/arq2prova1    
+TOP_DIR=xxxx   
 
 # Altere GEM_DIR para o diretório onde o gem5 está localizado
-GEM5_DIR=~/gem5
+GEM5_DIR=xxxx
 
 # Altere o executável do gem5 para gem5.fast, gem5.opt ou gem5.debug
 GEM5_BUILD_DIR=$GEM5_DIR/build/X86/gem5.opt
