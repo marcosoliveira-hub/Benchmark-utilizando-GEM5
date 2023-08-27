@@ -29,7 +29,7 @@ typedef struct
 
 // Função para criar uma estrutura Rede
 
-Rede *criar_rede(int num_vertices, int fonte, int sumidouro)
+Rede *criar_rede(int num_vertices, int num_arestas, int fonte, int sumidouro)
 {
     Rede *rede = (Rede *)malloc(sizeof(Rede));
     if (rede == NULL)
@@ -39,7 +39,7 @@ Rede *criar_rede(int num_vertices, int fonte, int sumidouro)
     }
     rede->num_vertices = num_vertices;
     rede->fluxo_maximo = 0;
-    rede->num_arestas = 0;
+    rede->num_arestas = num_arestas;
     rede->fonte = fonte;
     rede->sumidouro = sumidouro;
 
@@ -150,7 +150,7 @@ int *bfs(Rede *rede, int vertice_inicial)
 // Função para criar uma rede residual a partir de uma rede e um vetor de fluxo
 Rede *criar_rede_residual(Rede *rede, int *fluxo)
 {
-    Rede *rede_residual = criar_rede(rede->num_vertices, rede->fonte, rede->sumidouro);
+    Rede *rede_residual = criar_rede(rede->num_vertices, rede->num_arestas, rede->fonte, rede->sumidouro);
     for (int u = 0; u < rede->num_vertices; u++)
     {
         for (int v = 0; v < rede->num_vertices; v++)
@@ -170,7 +170,9 @@ void escrever_fluxo_maximo_e_grafo(Rede *rede, int fluxo_maximo, char *nome_arqu
 {
     FILE *arquivo = fopen(nome_arquivo, "w");
     fprintf(arquivo, "Fluxo maximo = %d\n", fluxo_maximo);
-    fprintf(arquivo, "%d %d\n", rede->num_vertices, rede->num_arestas);
+    int num_arestas = rede->num_arestas;
+    int num_vertices = rede->num_vertices;
+    fprintf(arquivo, "%d %d\n", num_vertices, num_arestas);
     for (int i = 0; i < rede->num_vertices; i++)
     {
         for (int j = 0; j < rede->num_vertices; j++)
@@ -265,7 +267,7 @@ Rede *criar_rede_arquivo(char *nome_arquivo)
     int num_vertices;
     int num_arestas;
     fscanf(arquivo, "%d %d", &num_vertices, &num_arestas);
-    Rede *rede = criar_rede(num_vertices, 0, num_vertices - 1);
+    Rede *rede = criar_rede(num_vertices, num_arestas, 0, num_vertices - 1);
     int u, v, capacidade;
     while (fscanf(arquivo, "%d %d %d", &u, &v, &capacidade) != EOF)
     {
@@ -287,7 +289,6 @@ int main(int argc, char *argv[])
 
     Rede *rede = criar_rede_arquivo(argv[1]);
     int fluxo_maximo = edmonds_karp(rede);
-    printf("Fluxo maximo: %d\n", fluxo_maximo);
     escrever_fluxo_maximo_e_grafo(rede, fluxo_maximo, argv[2]);
     destruir_rede(rede);
     return 0;
